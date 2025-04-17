@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 80px;
+            background-color: #f8f9fa;
+        }
+
+        .dashboard-container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .welcome-text {
+            margin-bottom: 30px;
+        }
+
+        .total-sale-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .total-sale-card h4 {
+            font-size: 2em;
+            color: #333;
+        }
+
+        .total-sale-card p {
+            font-size: 1.2em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Include Navbar -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container dashboard-container">
+    <div class="text-center welcome-text">
+        <h2>Dashboard Penjualan</h2>
+    </div>
+
+    <!-- Total Penjualan Hari Ini -->
+    <div class="total-sale-card text-center">
+        <h4>Total Penjualan Hari Ini</h4>
+        <p id="totalSale">Loading...</p>
+    </div>
+</div>
+
+<script>
+    // Mengambil data penjualan hari ini dari API
+    fetch('/dashboard/total-sale')
+        .then(response => response.json())
+        .then(data => {
+            const totalSale = data.data.totalSale; // Total penjualan dari response
+            document.getElementById('totalSale').textContent = totalSale + ' Transaksi'; // Menampilkan jumlah transaksi
+        })
+        .catch(error => {
+            console.error('Error fetching total sale data:', error);
+            document.getElementById('totalSale').textContent = 'Gagal mengambil data';
+        });
+</script>
+
+</body>
+</html>

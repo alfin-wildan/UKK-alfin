@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Stock Produk</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+<div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+<div class="container">
+
+    <h2>Edit Stock Produk</h2>
+    <br>
+    <form th:action="@{/product/update-stock}" method="post">
+        <div class="form-group">
+            <label for="stock">Stock Baru</label>
+            <input type="number" class="form-control" id="stock" name="stock" th:value="${product.stock}" required>
+        </div>
+        <input type="hidden" name="id" th:value="${product.id}" />
+        <button type="submit" class="btn btn-primary">Update Stock</button>
+    </form>
+    <br><br>
+    <a href="/product/list" class="btn btn-secondary">Kembali ke Daftar Produk</a>
+</div>
+</body>
+</html>
