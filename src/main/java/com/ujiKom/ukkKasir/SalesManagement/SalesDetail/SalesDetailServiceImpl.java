@@ -6,6 +6,7 @@ import com.ujiKom.ukkKasir.GeneralComponent.Utility.ServiceHelper;
 import com.ujiKom.ukkKasir.Product.Product;
 import com.ujiKom.ukkKasir.Product.ProductRepository;
 import com.ujiKom.ukkKasir.SalesManagement.Sales.Sales;
+import com.ujiKom.ukkKasir.SalesManagement.Sales.SalesRepository;
 import com.ujiKom.ukkKasir.SalesManagement.SalesDetail.DTO.DTOSalesDetail;
 import com.ujiKom.ukkKasir.UserManagement.User.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -20,14 +21,16 @@ import java.util.stream.Collectors;
 @Service
 public class SalesDetailServiceImpl implements SalesDetailService{
     private final SalesDetailRepository repository;
+    private final SalesRepository salesRepository;
     private final UserRepository userRepository;
     private final ServiceHelper serviceHelper;
     private final ProductRepository productRepository;
     @PersistenceContext
     private final EntityManager entityManager;
 
-    public SalesDetailServiceImpl(SalesDetailRepository repository, UserRepository userRepository, ServiceHelper serviceHelper, ProductRepository productRepository, EntityManager entityManager) {
+    public SalesDetailServiceImpl(SalesDetailRepository repository, SalesRepository salesRepository, UserRepository userRepository, ServiceHelper serviceHelper, ProductRepository productRepository, EntityManager entityManager) {
         this.repository = repository;
+        this.salesRepository = salesRepository;
         this.userRepository = userRepository;
         this.serviceHelper = serviceHelper;
         this.productRepository = productRepository;
@@ -127,26 +130,31 @@ public class SalesDetailServiceImpl implements SalesDetailService{
         if (salesDetail.getProduct() != null) {
             dto.setProduct(new DTOGeneral(salesDetail.getProduct().getId()));
         } else {
-            dto.setProduct(new DTOGeneral(0)); // Default or null product
+            dto.setProduct(new DTOGeneral(0));
         }
-
         if (salesDetail.getSales() != null) {
             dto.setSales(new DTOGeneral(salesDetail.getSales().getId()));
         } else {
-            dto.setSales(new DTOGeneral(0)); // Default or null sales
+            dto.setSales(new DTOGeneral(0));
         }
-
         return dto;
     }
 
 
     @Override
-    public DTOSalesDetail createSalesDetail(Integer productId, Integer userId, Integer amount, Integer subTotal) {
+    public void createSalesDetail(DTOSalesDetail dtoSalesDetail) {
         SalesDetail salesDetail = new SalesDetail();
-        Sales sales = null;
-        if (sales.getMember().getId() != null){
-
+        Product product = productRepository.findById(dtoSalesDetail.getProduct().getId());
+        Sales newSales = salesRepository.findById(dtoSalesDetail.getSales().getId());
+        if (newSales == null){
+            throw new RuntimeException("Sale not found with id " + dtoSalesDetail.getSales().getId());
         }
-        return null;
+            salesDetail.setAmount(dtoSalesDetail.getAmount());
+            salesDetail.setSubTotal(dtoSalesDetail.getSubTotal());
+            salesDetail.setProduct(product);
+            salesDetail.setSales(newSales);
+            salesDetail.setCreateAt(dtoSalesDetail.getCreatedAt());
+
+        repository.save(salesDetail);
     }
 }

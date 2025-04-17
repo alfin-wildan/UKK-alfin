@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Sales Detail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">Add Sales Detail</h2>
+
+    <!-- Alert Messages -->
+    <div th:if="${message}" class="alert alert-success" role="alert">
+        <span th:text="${message}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger" role="alert">
+        <span th:text="${error}"></span>
+    </div>
+
+    <form th:action="@{/sales/detail/add}" method="post" th:object="${dtoSalesDetail}">
+        <!-- Sales ID -->
+        <div class="form-group">
+            <label for="salesId">Sales ID</label>
+            <input type="number"
+                   class="form-control"
+                   id="salesId"
+                   th:field="*{sales.id}"
+                   required>
+        </div>
+
+        <!-- Product ID -->
+        <div class="form-group">
+            <label for="productId">Product ID</label>
+            <input type="number"
+                   class="form-control"
+                   id="productId"
+                   th:field="*{product.id}"
+                   required>
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group">
+            <label for="amount">Amount</label>
+            <input type="number"
+                   class="form-control"
+                   id="amount"
+                   th:field="*{amount}"
+                   required
+                   min="1">
+        </div>
+
+        <!-- Sub Total -->
+        <div class="form-group">
+            <label for="subTotal">Sub Total</label>
+            <input type="number"
+                   class="form-control"
+                   id="subTotal"
+                   th:field="*{subTotal}"
+                   required
+                   min="0">
+        </div>
+
+        <!-- Created At (Hidden) -->
+        <input type="hidden"
+               th:field="*{createdAt}"
+               th:value="${#temporals.create(#temporals.year(#temporals.createNow()),
+                                               #temporals.month(#temporals.createNow()),
+                                               #temporals.day(#temporals.createNow()),
+                                               #temporals.hour(#temporals.createNow()),
+                                               #temporals.minute(#temporals.createNow()),
+                                               #temporals.second(#temporals.createNow()))}">
+
+        <!-- Submit and Cancel Buttons -->
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a th:href="@{/sales/detail/list}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
