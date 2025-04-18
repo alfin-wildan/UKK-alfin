@@ -27,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,7 @@ import static org.springframework.http.HttpStatus.*;
 public class UserController extends ResponseResourceEntity<UserEntity> {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private BCryptPasswordEncoder passwordEncoder;
     private JWTTokenProvider jwtTokenProvider;
     private final ServiceHelper serviceHelper;
     private final TokenStoreService tokenStoreService;
@@ -280,7 +282,7 @@ public class UserController extends ResponseResourceEntity<UserEntity> {
 
     @GetMapping("/login")
     public String showLoginPage() {
-        return "login";  // Menampilkan halaman login.html
+        return "login";  // login.html
     }
 
     @PostMapping("/login")
@@ -289,50 +291,35 @@ public class UserController extends ResponseResourceEntity<UserEntity> {
                         Model model,
                         HttpServletRequest request) {
         try {
-            UserEntity loginUser = userService.findByEmail(email);
+            UserEntity loginUser = userService.findUserByEmail(email);
             if (loginUser == null) {
                 model.addAttribute("error", "User not found!");
-                return "login"; // Jika user tidak ditemukan, kembali ke halaman login
+                return "login";
             }
 
-            try {
-                authenticate(email, password); // Verifikasi password
-            } catch (Exception e) {
-                userService.validateLoginAttempt(loginUser);
+            // Verifikasi password
+            if (!passwordEncoder.matches(password, loginUser.getPassword())) {
                 model.addAttribute("error", "Invalid credentials");
-                return "login"; // Jika password salah, kembali ke halaman login
+                return "login";
             }
 
-            // Login berhasil, generate token
-            UserPrincipal userPrincipal = new UserPrincipal(loginUser);
-            String jwtToken = jwtTokenProvider.generateJwtToken(userPrincipal);
-            String refreshToken = jwtTokenProvider.generateRefreshToken(userPrincipal);
+            // Login berhasil: simpan user ke session
+            request.getSession().setAttribute("user", loginUser);
+            UserEntity sessionUser = (UserEntity) request.getSession().getAttribute("user");
+            System.out.println("User in session: " + sessionUser.getName());
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + jwtToken);  // Menyimpan token di header
-
-            // Redirect ke halaman produk setelah login berhasil
-            return "redirect:/dashboard";  // Redirect ke halaman produk setelah login
+            return "redirect:/product/list";  // redirect ke halaman dashboard
         } catch (Exception e) {
             model.addAttribute("error", "Login failed: " + e.getMessage());
-            return "login";  // Jika ada error, kembali ke halaman login
+            return "login";
         }
     }
-
-
-
-
     @PostMapping("/logout")
     public String logoutUser(HttpServletRequest request) {
-        String username = (String) request.getSession().getAttribute("username");
-
-        if (username != null) {
-            tokenStoreService.invalidateAccessToken(username);
-            request.getSession().invalidate();
-        }
-
-        return "redirect:/user/login"; // langsung redirect ke halaman login
+        request.getSession().invalidate(); // clear session
+        return "redirect:/user/login";
     }
+
 
 
     @Operation(summary = "Activate User", description = "Activate user")

@@ -13,6 +13,7 @@ public interface UserService {
     List<UserEntity> getUsers();
     SearchResult<UserEntity> listAll(String search, int pageNumber, int pageSize);
     UserEntity findUserByName(String name);
+    UserEntity findUserByEmail(String email);
     UserEntity findByEmail(String email);
     UserEntity findById(Integer id);
     void deleteUser(Integer id, HttpServletRequest httpServletRequest) throws Exception;

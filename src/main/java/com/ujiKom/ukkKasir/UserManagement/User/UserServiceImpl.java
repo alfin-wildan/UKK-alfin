@@ -183,7 +183,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void deleteUser(Integer id, HttpServletRequest httpServletRequest) throws Exception {
-        if (id == 5) {
+        if (id == 1) {
             throw new RuntimeException("User with ID 1 cannot be deleted.");
         }
 
@@ -293,6 +293,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public UserEntity findUserByEmail(String email) {
+        return repository.findUserByEmail(email);
+    }
+
+    @Override
     public UserEntity findByEmail(String email) {
         return repository.findByEmail(email);
     }
@@ -323,13 +328,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity user = repository.findByEmail(email);
+        UserEntity user = repository.findUserByEmail(email);
         if (user == null) {
             log.error("User Not Found by email: " + email);
             throw new UsernameNotFoundException("User Not Found by email: " + email);
         } else {
-            // user.setLastLoginDisplay(user.getLastLoginDate());
-            // user.setLastLoginDate(new Date());
+
             repository.save(user);
             UserPrincipal userPrincipal = new UserPrincipal(user);
             log.info("Returning found user By Email: " + email);
